@@ -1,4 +1,16 @@
 const mongoose = require('mongoose');
+const UserModel = require('./userModel');
+
+class ResultClass {
+  get user() {
+    return (async ()=>{
+      return await UserModel.findOne({_id: this.userId})
+    })()
+  }
+  get id(){
+    return this._id
+  }
+}
 
 const resultScheme = new mongoose.Schema({
   name: {
@@ -9,8 +21,8 @@ const resultScheme = new mongoose.Schema({
     type: String,
     default: Date.now()
   },
-  url: {
-    type: String,
+  imgsPaths: {
+    type: Array,
     required: true
   },
   doctorName: String,
@@ -18,8 +30,13 @@ const resultScheme = new mongoose.Schema({
     type: String,
     required: true
   },
-  note: String
+  note: String,
+  userId: {
+    type: String,
+    required: true
+  }
 });
 
+resultScheme.loadClass(ResultClass)
 const Result = mongoose.model('Result', resultScheme)
 module.exports = Result;

@@ -9,5 +9,8 @@ router
 
 router
   .route('/:id');
+router
+  .route('/img')
+  .post(resultsController.createImgResult)
 
 module.exports = router;
