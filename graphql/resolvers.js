@@ -81,8 +81,8 @@ const root = {
         id,
         ...toUpdate
       } = query.result;
-      const updatedRsult = Object.assign(result, toUpdate);
-      await updatedRsult.save();
+      const updatedResult = Object.assign(result, toUpdate);
+      await updatedResult.save();
       return 'Successfuly updated'
     } catch (e) {
       return e
