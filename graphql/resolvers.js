@@ -68,27 +68,27 @@ const root = {
       userId: thisUser.id
     })
   },
-  updateResult: async (query, {
-    thisUser
-  }) => {
+  updateResult: async (query, { thisUser }) => {
+    console.log(query)
     try {
       if (!thisUser) return "You need to login first";
-      if (!query.input.id) return "You need to specify id"
+      if (!query.result.id) return "You need to specify id"
       const result = await Result.findOne({
-        _id: query.input.id
+        _id: query.result.id
       });
       if (!result || result.userId != thisUser.id) return 'Access denied';
       const {
         id,
         ...toUpdate
-      } = query.input;
+      } = query.result;
       const updatedRsult = Object.assign(result, toUpdate);
       await updatedRsult.save();
       return 'Successfuly updated'
     } catch (e) {
-      return 'Some error occured'
+      return e
     }
   },
+
   deleteResult: async (query, {
     thisUser
   }) => {
