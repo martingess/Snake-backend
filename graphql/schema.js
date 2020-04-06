@@ -55,6 +55,7 @@ type Mutation {
   createResult(result: CreateResult): Result
   deleteResult(id: String!): String
   updateResult(result: UpdateResult): String
+  deleteUser: String
 }
 `);
 

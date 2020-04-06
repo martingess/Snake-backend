@@ -8,6 +8,10 @@ const config = {
   jwtSecret: 'ageirusjbjbieiqoepvhjasdoigur831ODideR'
 }
 
+const isLogedIn = (user) => {
+  if (!user) throw 'Access denied (401)'
+}
+
 const root = {
   login: async (query) => {
     const foundUser = await User.findOne({
@@ -24,6 +28,7 @@ const root = {
     }
     return 'Password is incorrect';
   },
+
   findUserResults: async (query, {
     thisUser
   }) => {
@@ -32,6 +37,7 @@ const root = {
     })
     return foundResults;
   },
+
   findUser: async (query) => {
     const foundUser = await User.findOne({
       login: query.username
@@ -39,10 +45,12 @@ const root = {
     if (!foundUser) return 'User not found';
     return foundUser
   },
+
   findAllUsers: async () => {
     const allUsers = await User.find();
     return allUsers
   },
+
   createUser: async (query) => {
     const userExist = await User.findOne({
       $or: [{
@@ -60,18 +68,20 @@ const root = {
       name: user.name
     }, config.jwtSecret);
   },
+
   createResult: async (query, {thisUser}) => {
-    if (!thisUser) return "You need to login first"
+    isLogedIn(thisUser)
     console.log(query)
     return await Result.create({
       ...query.result,
       userId: thisUser.id
     })
   },
+
   updateResult: async (query, { thisUser }) => {
-    console.log(query)
+    console.log(thisUser)
+    isLogedIn(thisUser)
     try {
-      if (!thisUser) return "You need to login first";
       if (!query.result.id) return "You need to specify id"
       const result = await Result.findOne({
         _id: query.result.id
@@ -89,12 +99,21 @@ const root = {
     }
   },
 
+  deleteUser: async (query, {thisUser}) => {
+    try{
+    isLogedIn(thisUser);
+    const user = await User.findOneAndDelete({_id: thisUser._id});
+    await Result.deleteMany({userId: thisUser._id})
+    return 'Success, user deleted'
+  } catch (err){
+    return err;
+  }
+  },
+
   deleteResult: async (query, {
     thisUser
   }) => {
-    if (!thisUser) {
-      return "Unauthorized access denied"
-    }
+   isLogedIn(thisUser)
 
     if (!query.id.match(/^[0-9a-fA-F]{24}$/)) {
       return "Wrong ID format"
