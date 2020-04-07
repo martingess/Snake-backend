@@ -69,7 +69,9 @@ const root = {
     }, config.jwtSecret);
   },
 
-  createResult: async (query, {thisUser}) => {
+  createResult: async (query, {
+    thisUser
+  }) => {
     isLogedIn(thisUser)
     console.log(query)
     return await Result.create({
@@ -78,7 +80,9 @@ const root = {
     })
   },
 
-  updateResult: async (query, { thisUser }) => {
+  updateResult: async (query, {
+    thisUser
+  }) => {
     console.log(thisUser)
     isLogedIn(thisUser)
     try {
@@ -99,21 +103,43 @@ const root = {
     }
   },
 
-  deleteUser: async (query, {thisUser}) => {
-    try{
-    isLogedIn(thisUser);
-    const user = await User.findOneAndDelete({_id: thisUser._id});
-    await Result.deleteMany({userId: thisUser._id})
-    return 'Success, user deleted'
-  } catch (err){
-    return err;
-  }
+  deleteUser: async (query, {
+    thisUser
+  }) => {
+    try {
+      isLogedIn(thisUser);
+      const user = await User.findOneAndDelete({
+        _id: thisUser._id
+      });
+      await Result.deleteMany({
+        userId: thisUser._id
+      })
+      return 'Success, user deleted'
+    } catch (err) {
+      return err;
+    }
+  },
+
+  updateUser: async (query, {thisUser}) => {
+    try {
+      console.log(`Log: user ${thisUser.login} trying to update his profile`)
+      isLogedIn(thisUser);
+      if(sha256(config.shaSalt + query.user.password).toString() !== thisUser.password) throw 'Wrong password'
+      if(query.user.newPassword) query.user.password = query.user.newPassword;
+      const {newPassword, ...restQuery} = query.user;
+      const updatedUser = Object.assign(thisUser, restQuery);
+      updatedUser.save();
+      console.log(`Log: user ${thisUser.login} has updated his profile successfuly`)
+      return '200: User info successfuly updated'
+    } catch (err) {
+      throw err
+    }
   },
 
   deleteResult: async (query, {
     thisUser
   }) => {
-   isLogedIn(thisUser)
+    isLogedIn(thisUser)
 
     if (!query.id.match(/^[0-9a-fA-F]{24}$/)) {
       return "Wrong ID format"

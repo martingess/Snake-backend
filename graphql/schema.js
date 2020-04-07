@@ -21,7 +21,14 @@ input UpdateResult {
   imgsPaths: String, 
   doctorName: String, 
   analyzeType: String, 
-  note: String
+  note: String,
+}
+
+input inputUpdateUser {
+  password: String!
+  newPassword: String
+  name: String
+  email: String
 }
 
 type Result {
@@ -56,6 +63,7 @@ type Mutation {
   deleteResult(id: String!): String
   updateResult(result: UpdateResult): String
   deleteUser: String
+  updateUser(user: inputUpdateUser): String
 }
 `);
 
