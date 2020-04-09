@@ -1,6 +1,7 @@
+const dotenv = require('dotenv').config()
 const express = require('express');
 const mongoose = require('mongoose');
-const resultRoutes = require('./routes/resultRoutes');
+const resultRoutes = require('./routes/resultRoutes'); 
 const userRoutes = require('./routes/userRoutes');
 const app = express();
 const expressGraphql = require('express-graphql');
@@ -10,12 +11,9 @@ const root = require('./graphql/resolvers')
 const User = require('./models/userModel')
 const cors = require('cors')
 
-const config = {
-  jwtSecret: 'ageirusjbjbieiqoepvhjasdoigur831ODideR'
-}
 
 //MONGOOSE
-mongoose.connect('mongodb://localhost:27018/snake-test', {
+mongoose.connect(process.env.DB_PATH + process.env.DB_PORT, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -28,7 +26,7 @@ app.use(userAuthorizationMiddleware)
 app.use('/api/v1/result', resultRoutes);
 app.use('/api/v1/user', userRoutes);
 app.use('/graphql', expressGraphql(async (req, res) => {
-  const jwt = jwtCheck(req, config.jwtSecret);
+  const jwt = jwtCheck(req, process.env.JWT_SECRET);
   if (jwt) {
     console.log("Содержимое джвт: ", jwt)
     const thisUser = await User.findOne({_id: jwt._id})
@@ -71,7 +69,7 @@ function userAuthorizationMiddleware(req, res, next){
     if (token == "undefined") next()
     let decoded;
     try {
-      decoded = jwt.verify(token, config.jwtSecret)
+      decoded = jwt.verify(token, process.env.JWT_SECRET)
     } catch (e) {
       return null;
     }
@@ -81,5 +79,5 @@ function userAuthorizationMiddleware(req, res, next){
 }
 
 //SERVER
-const port = 3022;
+const port = process.env.SERVER_PORT;
 app.listen(port, () => console.log(`Server is runing on ${port}`));

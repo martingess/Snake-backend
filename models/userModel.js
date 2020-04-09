@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
 const sha256 = require('crypto-js/sha256');
 
-//TODO: переместить в окружающие эту переменную >>
-const config = {
-  shaSalt: 'sdkq1ejsO2)#uwv7riuasdj&238g9abBGGGawd81)9*&$**dasdgguqp[z.,vndyERYY',
-}
-
 class UserClass {
   get id() {
     return this._id
@@ -39,7 +34,7 @@ const userScheme = new mongoose.Schema({
 userScheme.loadClass(UserClass)
 
 userScheme.pre('save', function(next) {
-  this.password = sha256(config.shaSalt + this.password).toString();
+  this.password = sha256(process.env.SHA_SECRET + this.password).toString();
   next();
 });
 

@@ -3,10 +3,7 @@ const Result = require('../models/resultModel')
 const sha256 = require('crypto-js/sha256');
 var jwt = require('jsonwebtoken');
 
-const config = {
-  shaSalt: 'sdkq1ejsO2)#uwv7riuasdj&238g9abBGGGawd81)9*&$**dasdgguqp[z.,vndyERYY',
-  jwtSecret: 'ageirusjbjbieiqoepvhjasdoigur831ODideR'
-}
+
 
 const isLogedIn = (user) => {
   if (!user) throw 'Access denied (401)'
@@ -18,13 +15,13 @@ const root = {
       login: query.username
     })
     if (!foundUser) return 'User not found'
-    if (foundUser.password === sha256(config.shaSalt + query.password).toString()) {
+    if (foundUser.password === sha256(process.env.SHA_SECRET + query.password).toString()) {
       return jwt.sign({
         login: foundUser.login,
         role: foundUser.role,
         _id: foundUser._id,
         name: foundUser.name
-      }, config.jwtSecret);
+      }, process.env.JWT_SECRET);
     }
     return 'Password is incorrect';
   },
@@ -66,7 +63,7 @@ const root = {
       role: user.role,
       _id: user._id,
       name: user.name
-    }, config.jwtSecret);
+    }, process.env.JWT_SECRET);
   },
 
   createResult: async (query, {
@@ -124,7 +121,7 @@ const root = {
     try {
       console.log(`Log: user ${thisUser.login} trying to update his profile`)
       isLogedIn(thisUser);
-      if(sha256(config.shaSalt + query.user.password).toString() !== thisUser.password) throw 'Wrong password'
+      if(sha256(process.env.SHA_SECRET + query.user.password).toString() !== thisUser.password) throw 'Wrong password'
       if(query.user.newPassword) query.user.password = query.user.newPassword;
       const {newPassword, ...restQuery} = query.user;
       const updatedUser = Object.assign(thisUser, restQuery);
