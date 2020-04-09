@@ -55,7 +55,10 @@ type Query {
   findUser(username: String): User,
   findAllUsers(username: String): [User]
   findUserResults(username: String): [Result]
+  search(query: String!): [Result]
 }
+
+
 
 type Mutation {
   createUser(user: CreateUser): String
@@ -68,3 +71,5 @@ type Mutation {
 `);
 
 module.exports = schema;
+
+// 

@@ -40,13 +40,4 @@ userScheme.pre('save', function(next) {
 
 const User = mongoose.model('User', userScheme)
 
-//TODO: delete this 
-// const func = async ()=>{
-//   const user = await User.findOne({login: "Max"})
-//   console.log(user)
-//   console.log(user.id)
-// }
-// func()
-
-
 module.exports = User;

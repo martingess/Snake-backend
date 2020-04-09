@@ -3,8 +3,6 @@ const Result = require('../models/resultModel')
 const sha256 = require('crypto-js/sha256');
 var jwt = require('jsonwebtoken');
 
-
-
 const isLogedIn = (user) => {
   if (!user) throw 'Access denied (401)'
 }
@@ -125,7 +123,7 @@ const root = {
       if(query.user.newPassword) query.user.password = query.user.newPassword;
       const {newPassword, ...restQuery} = query.user;
       const updatedUser = Object.assign(thisUser, restQuery);
-      updatedUser.save();
+      await updatedUser.save();
       console.log(`Log: user ${thisUser.login} has updated his profile successfuly`)
       return '200: User info successfuly updated'
     } catch (err) {
@@ -158,6 +156,22 @@ const root = {
     } catch (e) {
       return 'An error occurre'
     }
+  },
+
+  search: async (query, {thisUser}) => {
+    if(!query.query) throw "Not found"
+    isLogedIn(thisUser);
+    const regExpQuery = {$regex: query.query, $options: 'i'}
+    const results = await Result.find({
+      userId: thisUser.id,
+      $or: [
+        {name: regExpQuery},
+        {note: regExpQuery},
+        {doctorName: regExpQuery}
+      ]
+    })
+    if (!results[0]) throw 'Not found'
+    return results
   }
 }
 
