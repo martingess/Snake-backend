@@ -25,16 +25,15 @@ const resultScheme = new mongoose.Schema({
     type: Array,
     required: true
   },
-  doctorName: String,
-  analyzeType: {
-    type: String,
-    required: true
-  },
+  doctorsNames: [String],
+  waitingDoctorsConfirmation: [String],
+  doctorsComments: [String],
   note: String,
   userId: {
     type: String,
     required: true
-  }
+  },
+
 });
 
 resultScheme.loadClass(ResultClass)

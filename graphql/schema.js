@@ -1,29 +1,34 @@
 const {buildSchema} = require('graphql');
 const schema = buildSchema(`
+
+enum UserRole {
+  doctor
+  patient
+}
+
 input CreateResult {
   name: String!, 
   date: String, 
   imgsPaths: [String]!, 
-  doctorName: String, 
   analyzeType: String, 
   note: String
 }
 input CreateUser {
   login: String!, 
   password: String!, 
-  name: String!, 
-  email: String!
+  name: String, 
+  email: String
+  role: UserRole
 }
 input UpdateResult {
-  id: String!
+  id: String! 
   name: String, 
   date: String, 
-  imgsPaths: String, 
-  doctorName: String, 
+  imgsPaths: [String], 
+  shareWithDoctor: String, 
   analyzeType: String, 
   note: String,
 }
-
 input inputUpdateUser {
   password: String!
   newPassword: String
@@ -31,12 +36,15 @@ input inputUpdateUser {
   email: String
 }
 
+
 type Result {
   name: String,
   date: String,
   id: String
   imgsPaths: [String],
-  doctorName: String,
+  doctorsNames: [String],
+  waitingDoctorsConfirmation: [String],
+  doctorsComments: [String],
   analyzeType: String,
   note: String,
   user: User
@@ -54,8 +62,9 @@ type Query {
   login(username: String!, password: String!): String
   findUser(username: String): User,
   findAllUsers(username: String): [User]
-  findUserResults(username: String): [Result]
+  findUserResults: [Result]
   search(query: String!): [Result]
+  resultsForApprove: [Result]
 }
 
 
@@ -67,9 +76,12 @@ type Mutation {
   updateResult(result: UpdateResult): String
   deleteUser: String
   updateUser(user: inputUpdateUser): String
+  approveResult(id: String): String
+  removeDoctorFromResult(resultId: String!, doctorId: String): String
 }
 `);
 
 module.exports = schema;
 
-// 
+//      doctorApproveResult(id: String): String
+
