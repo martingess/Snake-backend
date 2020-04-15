@@ -11,6 +11,7 @@ input CreateResult {
   date: String, 
   imgsPaths: [String]!, 
   analyzeType: String, 
+  doctorName: String
   note: String
 }
 input CreateUser {
@@ -43,6 +44,7 @@ type Result {
   id: String
   imgsPaths: [String],
   doctorsNames: [String],
+  doctorName: String,
   waitingDoctorsConfirmation: [String],
   doctorsComments: [String],
   analyzeType: String,
@@ -76,7 +78,7 @@ type Mutation {
   updateResult(result: UpdateResult): String
   deleteUser: String
   updateUser(user: inputUpdateUser): String
-  approveResult(id: String): String
+  approveResult(id: String!): String
   removeDoctorFromResult(resultId: String!, doctorId: String): String
 }
 `);

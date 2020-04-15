@@ -252,6 +252,7 @@ const root = {
     //if user is doctor who tries to delete himself from result
     if (!query.doctorId) {
       isUserDoctor(thisUser);
+      query.doctorId = thisUser.id
       const result = await Result.findOne({
         _id: query.resultId,
         $or: [
