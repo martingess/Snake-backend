@@ -27,7 +27,8 @@ input UpdateResult {
   date: String, 
   imgsPaths: [String], 
   shareWithDoctor: String, 
-  analyzeType: String, 
+  analyzeType: String,
+  doctorName: String 
   note: String,
 }
 input inputUpdateUser {
@@ -37,13 +38,12 @@ input inputUpdateUser {
   email: String
 }
 
-
 type Result {
   name: String,
   date: String,
   id: String
   imgsPaths: [String],
-  doctorsNames: [String],
+  doctorsIds: [String],
   doctorName: String,
   waitingDoctorsConfirmation: [String],
   doctorsComments: [String],
@@ -67,6 +67,7 @@ type Query {
   findUserResults: [Result]
   search(query: String!): [Result]
   resultsForApprove: [Result]
+  findDoctorResults: [Result]
 }
 
 
@@ -84,6 +85,3 @@ type Mutation {
 `);
 
 module.exports = schema;
-
-//      doctorApproveResult(id: String): String
-

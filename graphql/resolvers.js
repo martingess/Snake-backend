@@ -125,7 +125,7 @@ const root = {
           !result.waitingDoctorsConfirmation.includes(
             shareWithDoctor,
           ) &&
-          !result.doctorsNames.includes(shareWithDoctor)
+          !result.doctorsIds.includes(shareWithDoctor)
         ) {
           result.waitingDoctorsConfirmation.push(shareWithDoctor);
         }
@@ -236,7 +236,7 @@ const root = {
         result.waitingDoctorsConfirmation = result.waitingDoctorsConfirmation.filter(
           (item) => item != thisUser.id,
         );
-        result.doctorsNames.push(thisUser.id);
+        result.doctorsIds.push(thisUser.id);
         await result.save();
         return 'Result aproved';
       }
@@ -257,7 +257,7 @@ const root = {
         _id: query.resultId,
         $or: [
           { waitingDoctorsConfirmation: thisUser.id },
-          { doctorsNames: thisUser.id },
+          { doctorsIds: thisUser.id },
         ],
       });
       isResultExsist(result);
@@ -274,12 +274,17 @@ const root = {
       result.waitingDoctorsConfirmation = result.waitingDoctorsConfirmation.filter(
         (item) => item != query.doctorId,
       );
-      result.doctorsNames = result.doctorsNames.filter(
+      result.doctorsIds = result.doctorsIds.filter(
         (item) => item != query.doctorId,
       );
       await result.save();
     }
   },
+  findDoctorResults: async (query, {thisUser}) => {
+    isLogedIn(thisUser);
+    const results = await Result.find({doctorsIds: thisUser.id})
+    return results;
+  }
 };
 
 module.exports = root;

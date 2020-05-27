@@ -25,7 +25,7 @@ const resultScheme = new mongoose.Schema({
     type: Array,
     required: true
   },
-  doctorsNames: [String],
+  doctorsIds: [String],
   doctorName: String,
   waitingDoctorsConfirmation: [String],
   doctorsComments: [String],

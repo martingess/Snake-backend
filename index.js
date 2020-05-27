@@ -28,7 +28,6 @@ app.use('/api/v1/user', userRoutes);
 app.use('/graphql', expressGraphql(async (req, res) => {
   const jwt = jwtCheck(req, process.env.JWT_SECRET);
   if (jwt) {
-    console.log("Содержимое джвт: ", jwt)
     const thisUser = await User.findOne({_id: jwt._id})
     return ({
       schema: schema,
