@@ -24,33 +24,38 @@ const isUserDoctor = (user) => {
 };
 
 const isQueryEmpty = (query) => {
-  if(query === "") throw 'Your query is invalid'
+  if (query === "") throw 'Your query is invalid'
 }
 
 const root = {
   login: async (query) => {
-    const foundUser = await User.findOne({
-      login: query.username,
-    });
-    if (!foundUser) return 'User not found';
-    if (
-      foundUser.password ===
-      sha256(process.env.SHA_SECRET + query.password).toString()
-    ) {
-      return jwt.sign(
-        {
-          login: foundUser.login,
-          role: foundUser.role,
-          _id: foundUser._id,
-          name: foundUser.name,
-        },
-        process.env.JWT_SECRET,
-      );
+    try {
+      const foundUser = await User.findOne({
+        login: query.username,
+      });
+      if (!foundUser) return 'User not found';
+      if (
+        foundUser.password ===
+        sha256(process.env.SHA_SECRET + query.password).toString()
+      ) {
+        return jwt.sign({
+            login: foundUser.login,
+            role: foundUser.role,
+            _id: foundUser._id,
+            name: foundUser.name,
+          },
+          process.env.JWT_SECRET,
+        );
+      }
+      return 'Password is incorrect';
+    } catch (err) {
+      throw err;
     }
-    return 'Password is incorrect';
   },
 
-  findUserResults: async (query, { thisUser }) => {
+  findUserResults: async (query, {
+    thisUser
+  }) => {
     isLogedIn(thisUser);
     const foundResults = await Result.find({
       userId: thisUser.id,
@@ -74,19 +79,21 @@ const root = {
 
   createUser: async (query) => {
     const userExist = await User.findOne({
-      $or: [
-        {
-          login: query.user.login,
+      $or: [{
+          login: new RegExp(`^${query.user.login}$`, 'i'),
         },
         {
-          email: query.user.email,
+          email: new RegExp(`^${query.user.email}$`, 'i'),
         },
       ],
     });
-    if (userExist) return 'This login or email is already taken';
+
+    if (userExist) {
+      const whatExist = userExist.login === query.user.login ? 'login' : 'email'
+      throw `User with this ${whatExist} already exsist`;
+    }
     const user = await User.create(query.user);
-    return jwt.sign(
-      {
+    return jwt.sign({
         login: user.login,
         role: user.role,
         _id: user._id,
@@ -95,8 +102,29 @@ const root = {
       process.env.JWT_SECRET,
     );
   },
+  checkUsername: async (query) => {
+    const {
+      username
+    } = query;
+    const user = await User.findOne({
+      login: new RegExp(`^${username}$`, 'i')
+    });
+    return user ? 'exist' : 'available'
+  },
+  checkEmail: async (query) => {
+    const {
+      email
+    } = query;
+    const user = await User.findOne({
+      email: new RegExp(`^${email}$`, 'i')
+    });
 
-  createResult: async (query, { thisUser }) => {
+    return user ? 'exist' : 'available'
+  },
+
+  createResult: async (query, {
+    thisUser
+  }) => {
     isLogedIn(thisUser);
     console.log(query);
     return await Result.create({
@@ -105,7 +133,9 @@ const root = {
     });
   },
 
-  updateResult: async (query, { thisUser }) => {
+  updateResult: async (query, {
+    thisUser
+  }) => {
     try {
       //validation
       isLogedIn(thisUser);
@@ -117,7 +147,10 @@ const root = {
       if (!result || result.userId != thisUser.id)
         return 'Access denied';
       //cut off unnecessary fields
-      const { id, shareWithDoctor, ...toUpdate } = query.result;
+      const {
+        shareWithDoctor,
+        ...toUpdate
+      } = query.result;
       //is user trying to add new doctor? If so, add doctor to result
       if (shareWithDoctor) {
         checkId(shareWithDoctor);
@@ -139,7 +172,9 @@ const root = {
     }
   },
 
-  deleteUser: async (query, { thisUser }) => {
+  deleteUser: async (query, {
+    thisUser
+  }) => {
     try {
       isLogedIn(thisUser);
       await User.findOneAndDelete({
@@ -154,7 +189,9 @@ const root = {
     }
   },
 
-  updateUser: async (query, { thisUser }) => {
+  updateUser: async (query, {
+    thisUser
+  }) => {
     try {
       console.log(
         `Log: user ${thisUser.login} trying to update his profile`,
@@ -168,7 +205,10 @@ const root = {
         throw 'Wrong password';
       if (query.user.newPassword)
         query.user.password = query.user.newPassword;
-      const { newPassword, ...restQuery } = query.user;
+      const {
+        newPassword,
+        ...restQuery
+      } = query.user;
       const updatedUser = Object.assign(thisUser, restQuery);
       await updatedUser.save();
       console.log(
@@ -180,7 +220,9 @@ const root = {
     }
   },
 
-  deleteResult: async (query, { thisUser }) => {
+  deleteResult: async (query, {
+    thisUser
+  }) => {
     isLogedIn(thisUser);
     checkId(query.id);
     try {
@@ -202,16 +244,26 @@ const root = {
     }
   },
 
-  search: async (query, { thisUser }) => {
+  search: async (query, {
+    thisUser
+  }) => {
     if (!query.query) throw 'Not found';
     isLogedIn(thisUser);
-    const regExpQuery = { $regex: query.query, $options: 'i' };
+    const regExpQuery = {
+      $regex: query.query,
+      $options: 'i'
+    };
     const results = await Result.find({
       userId: thisUser.id,
-      $or: [
-        { name: regExpQuery },
-        { note: regExpQuery },
-        { doctorName: regExpQuery },
+      $or: [{
+          name: regExpQuery
+        },
+        {
+          note: regExpQuery
+        },
+        {
+          doctorName: regExpQuery
+        },
       ],
     });
     if (!results[0]) throw 'Not found';
@@ -219,7 +271,9 @@ const root = {
   },
 
   //doctor section
-  resultsForApprove: async (query, { thisUser }) => {
+  resultsForApprove: async (query, {
+    thisUser
+  }) => {
     isLogedIn(thisUser);
     const results = await Result.find({
       waitingDoctorsConfirmation: thisUser.id,
@@ -227,10 +281,14 @@ const root = {
     return results;
   },
 
-  approveResult: async (query, { thisUser }) => {
+  approveResult: async (query, {
+    thisUser
+  }) => {
     try {
       isLogedIn(thisUser);
-      const result = await Result.findOne({ _id: query.id });
+      const result = await Result.findOne({
+        _id: query.id
+      });
       isResultExsist(result);
       if (result.waitingDoctorsConfirmation.includes(thisUser.id)) {
         result.waitingDoctorsConfirmation = result.waitingDoctorsConfirmation.filter(
@@ -245,7 +303,9 @@ const root = {
       return err;
     }
   },
-  removeDoctorFromResult: async (query, { thisUser }) => {
+  removeDoctorFromResult: async (query, {
+    thisUser
+  }) => {
     isLogedIn(thisUser);
     isQueryEmpty(query.doctorId);
     isQueryEmpty(query.resultId);
@@ -255,9 +315,12 @@ const root = {
       query.doctorId = thisUser.id
       const result = await Result.findOne({
         _id: query.resultId,
-        $or: [
-          { waitingDoctorsConfirmation: thisUser.id },
-          { doctorsIds: thisUser.id },
+        $or: [{
+            waitingDoctorsConfirmation: thisUser.id
+          },
+          {
+            doctorsIds: thisUser.id
+          },
         ],
       });
       isResultExsist(result);
@@ -270,7 +333,7 @@ const root = {
     isResultExsist(result);
     await deleteDoctorFromResult(result);
     return 'Doctor deleted from result'
-    async function deleteDoctorFromResult (result) {
+    async function deleteDoctorFromResult(result) {
       result.waitingDoctorsConfirmation = result.waitingDoctorsConfirmation.filter(
         (item) => item != query.doctorId,
       );
@@ -280,9 +343,13 @@ const root = {
       await result.save();
     }
   },
-  findDoctorResults: async (query, {thisUser}) => {
+  findDoctorResults: async (query, {
+    thisUser
+  }) => {
     isLogedIn(thisUser);
-    const results = await Result.find({doctorsIds: thisUser.id})
+    const results = await Result.find({
+      doctorsIds: thisUser.id
+    })
     return results;
   }
 };

@@ -10,13 +10,15 @@ const schema = require('./graphql/schema')
 const root = require('./graphql/resolvers')
 const User = require('./models/userModel')
 const cors = require('cors')
-
+const fs = require('fs')
 
 //MONGOOSE
-mongoose.connect(process.env.DB_PATH + process.env.DB_PORT, {
+mongoose.connect(`${process.env.DB_PATH}:${process.env.DB_PORT}/${process.env.DB_NAME}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
+
+fs.mkdirSync('./public/img', {recursive: true});
 
 //PATHS & middlewares
 app.use(cors())

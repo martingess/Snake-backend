@@ -68,6 +68,9 @@ type Query {
   search(query: String!): [Result]
   resultsForApprove: [Result]
   findDoctorResults: [Result]
+  checkUsername(username: String!): String
+  checkEmail(email: String!): String
+
 }
 
 
