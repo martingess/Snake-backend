@@ -269,6 +269,20 @@ const root = {
     if (!results[0]) throw 'Not found';
     return results;
   },
+  searchDoctors: async (query, {
+    thisUser
+  }) => {
+    isLogedIn(thisUser);
+    const regExpQuery = {
+      $regex: query.query,
+      $options: 'i'
+    }
+    return await User.find({
+      role: 'doctor',
+      $or: [{login: regExpQuery},
+      {name: regExpQuery}]
+    })
+  },
 
   //doctor section
   resultsForApprove: async (query, {

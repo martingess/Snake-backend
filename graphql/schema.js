@@ -43,9 +43,9 @@ type Result {
   date: String,
   id: String
   imgsPaths: [String],
-  doctorsIds: [String],
+  doctors: [User],
   doctorName: String,
-  waitingDoctorsConfirmation: [String],
+  notConfirmedDoctors: [User],
   doctorsComments: [String],
   analyzeType: String,
   note: String,
@@ -70,6 +70,7 @@ type Query {
   findDoctorResults: [Result]
   checkUsername(username: String!): String
   checkEmail(email: String!): String
+  searchDoctors(query: String!): [User]
 
 }
 

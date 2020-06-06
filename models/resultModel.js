@@ -3,12 +3,24 @@ const UserModel = require('./userModel');
 
 class ResultClass {
   get user() {
-    return (async ()=>{
-      return await UserModel.findOne({_id: this.userId})
+    return (async () => {
+      return await UserModel.findOne({
+        _id: this.userId
+      })
     })()
   }
-  get id(){
+  get id() {
     return this._id
+  }
+  get doctors() {
+    return (async () => await Promise.all(this.doctorsIds.map(id => UserModel.findOne({
+      _id: id
+    }))))
+  }
+  get notConfirmedDoctors() {
+    return (async () => await Promise.all(this.waitingDoctorsConfirmation.map(id => UserModel.findOne({
+      _id: id
+    }))))
   }
 }
 
